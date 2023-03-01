@@ -25,6 +25,7 @@ import com.ibm.validation.liberty.bean.ConfigInfo;
 import com.ibm.validation.liberty.bean.EndpointInfo;
 import com.ibm.validation.liberty.bean.HttpSessionInfo;
 import com.ibm.validation.liberty.bean.IncludeInfo;
+import com.ibm.validation.liberty.bean.JwtSsoInfo;
 import com.ibm.validation.liberty.bean.LDAPRegistryInfo;
 import com.ibm.validation.liberty.bean.SSLInfo;
 import com.ibm.validation.liberty.bean.WebAppSecurityInfo;
@@ -206,7 +207,7 @@ public class CheckCompliance {
 					}
 				}
 			}
-			
+
 			nodeList = doc.getElementsByTagName("basicRegistry");
 			
 			if (nodeList.getLength() > 0) {
@@ -290,6 +291,26 @@ public class CheckCompliance {
 					if (!violations.isEmpty()) {						
 						for (ConstraintViolation<HttpSessionInfo> violation : violations) {
 							validationErrors.add("4.1.1 HTTP Session Cookies: " + violation.getMessage());
+						}
+					}
+				}
+			}
+			
+			nodeList = doc.getElementsByTagName("jwtSso");
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				Node node = nodeList.item(i);
+					
+				if (node.getNodeType() == Node.ELEMENT_NODE) {
+					Element element = (Element) node;
+					JwtSsoInfo jwtSSoInfo = new JwtSsoInfo();
+					jwtSSoInfo.setCookieName(element.getAttribute("cookieName"));
+
+					Set<ConstraintViolation<JwtSsoInfo>> violations = validator.validate(jwtSSoInfo);
+
+					// Validate using Bean Validation and add violations to List
+					if (!violations.isEmpty()) {						
+						for (ConstraintViolation<JwtSsoInfo> violation : violations) {
+							validationErrors.add("4.1.2 JWT SSO: " + violation.getMessage());
 						}
 					}
 				}

@@ -25,7 +25,7 @@ public class WebAppSecurityInfo implements Serializable {
 	@Pattern(regexp="true", message="ssoRequiresSSL must be set to true")
 	private String ssoRequiresSSL;
 	
-	@Pattern(regexp="^(?!LtpaToken2$)", message="ssoCookieName must not be LtpaToken2")
+	@Pattern(regexp="^(?!LtpaToken2$).*$", message="ssoCookieName must not be LtpaToken2")
 	private String ssoCookieName;
 	
 	@Pattern(regexp="true", message="useOnlyCustomCookieName must be set to true")
