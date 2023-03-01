@@ -23,6 +23,7 @@ import org.xml.sax.SAXException;
 import com.ibm.validation.liberty.bean.ApplicationMonitorInfo;
 import com.ibm.validation.liberty.bean.ConfigInfo;
 import com.ibm.validation.liberty.bean.EndpointInfo;
+import com.ibm.validation.liberty.bean.HttpSessionInfo;
 import com.ibm.validation.liberty.bean.IncludeInfo;
 import com.ibm.validation.liberty.bean.LDAPRegistryInfo;
 import com.ibm.validation.liberty.bean.SSLInfo;
@@ -186,13 +187,21 @@ public class CheckCompliance {
 					Element element = (Element) node;
 					WebAppSecurityInfo webAppSecurityInfo = new WebAppSecurityInfo();
 					webAppSecurityInfo.setDisplayAuthenticationRealm(element.getAttribute("displayAuthenticationRealm"));
-					
+					webAppSecurityInfo.setHttpOnlyCookies("httpOnlyCookies");
+					webAppSecurityInfo.setSameSiteCookie("sameSiteCookie");
+					webAppSecurityInfo.setSetCookieSecureFlag("setCookieSecureFlag");
+					webAppSecurityInfo.setSsoCookieName("ssoCookieName");
+					webAppSecurityInfo.setSsoDomainNames("ssoDomainNames");
+					webAppSecurityInfo.setSsoRequiresSSL("ssoRequiresSSL");
+					webAppSecurityInfo.setTrackLoggedOutSSOCookies("trackLoggedOutSSOCookies");
+					webAppSecurityInfo.setUseOnlyCustomCookieName("useOnlyCustomCookieName");
+
 					Set<ConstraintViolation<WebAppSecurityInfo>> violations = validator.validate(webAppSecurityInfo);
 
 					// Validate using Bean Validation and add violations to List
 					if (!violations.isEmpty()) {						
 						for (ConstraintViolation<WebAppSecurityInfo> violation : violations) {
-							validationErrors.add("2.1 Display Authentication Realm : " + violation.getMessage());
+							validationErrors.add("2.1/4.1.2 Web Application Security: " + violation.getMessage());
 						}
 					}
 				}
@@ -260,6 +269,30 @@ public class CheckCompliance {
 			
 			if (nodeList.getLength() == 0) {
 				validationErrors.add("3.2 SDK Security Manager is missing");
+			}
+			
+			nodeList = doc.getElementsByTagName("httpSession");
+
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				Node node = nodeList.item(i);
+					
+				if (node.getNodeType() == Node.ELEMENT_NODE) {
+					Element element = (Element) node;
+					HttpSessionInfo httpSessionInfo = new HttpSessionInfo();
+					httpSessionInfo.setCookieDomain(element.getAttribute("cookieDomain"));
+					httpSessionInfo.setCookieHttpOnly(element.getAttribute("cookieHttpOnly"));
+					httpSessionInfo.setCookieSameSite(element.getAttribute("cookieSameSite"));
+					httpSessionInfo.setCookieSecure(element.getAttribute("cookieSecure"));
+					
+					Set<ConstraintViolation<HttpSessionInfo>> violations = validator.validate(httpSessionInfo);
+
+					// Validate using Bean Validation and add violations to List
+					if (!violations.isEmpty()) {						
+						for (ConstraintViolation<HttpSessionInfo> violation : violations) {
+							validationErrors.add("4.1.1 HTTP Session Cookies: " + violation.getMessage());
+						}
+					}
+				}
 			}
 			
 			// Finished, so let's print out the Validation errors
