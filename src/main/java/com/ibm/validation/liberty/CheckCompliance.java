@@ -34,6 +34,7 @@ import com.ibm.validation.liberty.bean.WebAppSecurityInfo;
  * 
  * @author Brian S Paskin (IBM Italia)
  * @version 1.0.0.0 (15/02/2019)
+ * @version 2.0.0.0 (01/03/2023)
  */
 
 public class CheckCompliance {
