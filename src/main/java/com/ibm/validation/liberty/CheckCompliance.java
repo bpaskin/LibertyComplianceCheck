@@ -73,67 +73,8 @@ public class CheckCompliance {
 			doc.getDocumentElement().normalize();
 			
 			System.out.println("CIS WORKBENCH LEVEL : " + CIS_WORKBENCH_LEVEL + "\n");
-				
-			// Check the Endpoints to make sure they are compliant
-			// uses Bean Validation
-			// uses a loop since there could be more than 1 entry
-			NodeList nodeList = doc.getElementsByTagName("httpEndpoint");
-			for (int i = 0; i < nodeList.getLength(); i++) {
-				Node node = nodeList.item(i);
-					
-				if (node.getNodeType() == Node.ELEMENT_NODE) {
-					Element element = (Element) node;
-					EndpointInfo endpointInfo = new EndpointInfo();
-					
-					endpointInfo.setHost(element.getAttribute("host"));
-					endpointInfo.setName(element.getAttribute("id"));
-					endpointInfo.setHttpPort(Integer.parseInt(element.getAttribute("httpPort")));
-					endpointInfo.setHttpsPort(Integer.parseInt(element.getAttribute("httpsPort")));
-					
-					Set<ConstraintViolation<EndpointInfo>> violations = validator.validate(endpointInfo);
-					
-					// Validate using Bean Validation and add violations to List
-					if (!violations.isEmpty()) {						
-						for (ConstraintViolation<EndpointInfo> violation : violations) {
-							validationErrors.add("Endpoint: " + violation.getMessage());
-						}
-					}
-				}
-			}
 			
-			// Check the SSL entries
-			// uses Bean Validation
-			// uses a loop since there could be more than 1 entry
-			nodeList = doc.getElementsByTagName("ssl");
-			for (int i = 0; i < nodeList.getLength(); i++) {
-				Node node = nodeList.item(i);
-					
-				if (node.getNodeType() == Node.ELEMENT_NODE) {
-					Element element = (Element) node;
-					SSLInfo sslInfo = new SSLInfo();
-						
-					sslInfo.setId(element.getAttribute("id"));
-					sslInfo.setProtocol(element.getAttribute("sslProtocol"));
-					sslInfo.setSecurityLevel(element.getAttribute("securityLevel"));
-					
-					if (element.getAttribute("clientAuthenticationSupported").equalsIgnoreCase("true")) {
-						sslInfo.setClientAuthSupported(true);
-					} else {
-						sslInfo.setClientAuthSupported(false);
-					}
-
-					Set<ConstraintViolation<SSLInfo>> violations = validator.validate(sslInfo);
-					
-					// Validate using Bean Validation and add violations to List
-					if (!violations.isEmpty()) {						
-						for (ConstraintViolation<SSLInfo> violation : violations) {
-							validationErrors.add("SSL: " + violation.getMessage());
-						}
-					}
-				}
-			}	
-			
-			nodeList = doc.getElementsByTagName("config");
+			NodeList nodeList = doc.getElementsByTagName("config");
 			
 			if (nodeList.getLength() == 0) {
 				validationErrors.add("1.6 Config: configuration element missing");
@@ -316,6 +257,72 @@ public class CheckCompliance {
 				}
 			}
 			
+			// Check the SSL entries
+			// uses Bean Validation
+			// uses a loop since there could be more than 1 entry
+			nodeList = doc.getElementsByTagName("ssl");
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				Node node = nodeList.item(i);
+					
+				if (node.getNodeType() == Node.ELEMENT_NODE) {
+					Element element = (Element) node;
+					SSLInfo sslInfo = new SSLInfo();
+						
+					sslInfo.setId(element.getAttribute("id"));
+					sslInfo.setProtocol(element.getAttribute("sslProtocol"));
+					sslInfo.setSecurityLevel(element.getAttribute("securityLevel"));
+					sslInfo.setClientAuthentication(element.getAttribute("clientAuthentication"));
+					sslInfo.setVerifyHostname(element.getAttribute("verifyHostname"));
+					sslInfo.setEnabledCiphers(element.getAttribute("enabledCiphers"));
+					sslInfo.setEnforceCipherOrder(element.getAttribute("enforceCipherOrder"));
+					sslInfo.setTrustDefaultCerts(element.getAttribute("trustDefaultCerts"));
+
+					
+					if (element.getAttribute("clientAuthenticationSupported").equalsIgnoreCase("true")) {
+						sslInfo.setClientAuthSupported(true);
+					} else {
+						sslInfo.setClientAuthSupported(false);
+					}
+
+					Set<ConstraintViolation<SSLInfo>> violations = validator.validate(sslInfo);
+					
+					// Validate using Bean Validation and add violations to List
+					if (!violations.isEmpty()) {						
+						for (ConstraintViolation<SSLInfo> violation : violations) {
+							validationErrors.add("4.2 SSL: " + violation.getMessage());
+						}
+					}
+				}
+			}
+			
+			
+		// Check the Endpoints to make sure they are compliant
+		// uses Bean Validation
+		// uses a loop since there could be more than 1 entry
+		nodeList = doc.getElementsByTagName("httpEndpoint");
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			Node node = nodeList.item(i);
+				
+			if (node.getNodeType() == Node.ELEMENT_NODE) {
+				Element element = (Element) node;
+				EndpointInfo endpointInfo = new EndpointInfo();
+				
+				endpointInfo.setHost(element.getAttribute("host"));
+				endpointInfo.setName(element.getAttribute("id"));
+				endpointInfo.setHttpPort(Integer.parseInt(element.getAttribute("httpPort")));
+				endpointInfo.setHttpsPort(Integer.parseInt(element.getAttribute("httpsPort")));
+				
+				Set<ConstraintViolation<EndpointInfo>> violations = validator.validate(endpointInfo);
+				
+				// Validate using Bean Validation and add violations to List
+				if (!violations.isEmpty()) {						
+					for (ConstraintViolation<EndpointInfo> violation : violations) {
+						validationErrors.add("4.2 HTTP Endpoint: " + violation.getMessage());
+					}
+				}
+			}
+		}
+		
 			// Finished, so let's print out the Validation errors
 			if (validationErrors.isEmpty()) {
 				System.out.println("Validation found no errors");
